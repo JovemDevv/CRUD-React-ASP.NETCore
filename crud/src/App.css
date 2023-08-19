@@ -1,5 +1,20 @@
 .badge-dark {
-    background-color: #525457; 
-    color: #ffffff; 
-  }
+  background-color: #525457; 
+  color: #ffffff; 
+}
   
+#id{
+  background-color: #cccccc; /* Cor de fundo cinza */
+  cursor: not-allowed; /* Cursor de não permitido */
+  font-weight: bold; 
+}
+
+.form-label {
+  font-weight: bold;
+  font-size: 20px; 
+}
+
+.form-control {
+  font-size: 16px;
+  
+}

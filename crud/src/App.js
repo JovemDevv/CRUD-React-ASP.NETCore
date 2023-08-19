@@ -1,89 +1,97 @@
 import React, { useState } from 'react';
 import './App.css';
+import Formulario from './components/Formulario';
+import ListaAtividades from './components/ListaAtividades';
 
 function App() {
   const [atividades, setAtividades] = useState([]);
+  const [novaAtividade, setNovaAtividade] = useState({ id: '', titulo: '', descricao: '' });
+  const [prioridadeSelecionada, setPrioridadeSelecionada] = useState('0');
+  const [modoEdicao, setModoEdicao] = useState(false);
+  const [idEdicao, setIdEdicao] = useState(null);
 
-  const [novaAtividade, setNovaAtividade] = useState({ id: '', descricao: '' });
+  function calcularProximoId() {
+    if (atividades.length === 0) {
+      return 1;
+    } else {
+      const maxId = Math.max(...atividades.map(atividade => atividade.id));
+      return maxId + 1;
+    }
+  }
 
   function addAtividade(e) {
     e.preventDefault();
 
-    const novoId = atividades.length > 0 ? atividades[atividades.length - 1].id + 1 : 1;
+    if (prioridadeSelecionada !== '0') {
+      const novoId = calcularProximoId();
 
-    const atividade = {
-      id: novoId,
-      descricao: novaAtividade.descricao
-    };
+      const atividade = {
+        id: novoId,
+        titulo: novaAtividade.titulo,
+        descricao: novaAtividade.descricao,
+        prioridade: prioridadeSelecionada
+      };
 
-    setAtividades([...atividades, { ...atividade}]);
+      setAtividades([...atividades, { ...atividade }]);
+      setNovaAtividade({ id: '', titulo: '', descricao: '' });
+      setPrioridadeSelecionada('0');
+    }
+  }
 
-    // Limpar campos
-    setNovaAtividade({ id: '', descricao: '' });
-    console.log(atividades)
+  function editarAtividade(id) {
+    const atividadeSelecionada = atividades.find(atividade => atividade.id === id);
+    setModoEdicao(true);
+    setIdEdicao(id);
+    setNovaAtividade({ ...atividadeSelecionada });
+    setPrioridadeSelecionada(atividadeSelecionada.prioridade);
+  }
+
+  function salvarEdicao() {
+    const novasAtividades = atividades.map(atividade =>
+      atividade.id === idEdicao
+        ? { ...novaAtividade, prioridade: prioridadeSelecionada, id: idEdicao }
+        : atividade
+    );
+
+    setAtividades(novasAtividades);
+    setModoEdicao(false);
+    setIdEdicao(null);
+    setNovaAtividade({ id: '', titulo: '', descricao: '' });
+    setPrioridadeSelecionada('0');
+  }
+
+  function cancelarEdicao() {
+    setModoEdicao(false);
+    setIdEdicao(null);
+    setNovaAtividade({ id: '', titulo: '', descricao: '' });
+    setPrioridadeSelecionada('0');
+  }
+
+  function deletarAtividade(id) {
+    const novaListaAtividades = atividades.filter(atividade => atividade.id !== id);
+    setAtividades(novaListaAtividades);
   }
 
   return (
     <div>
-      <form className="row g-3">
-      <div className="form-group col-md-5">
-        <label htmlFor="inputEmail4">ID</label>
-        <input id="id"
-        type="text"  
-        className="form-control" 
-        placeholder="ID"
-            value={novaAtividade.id}
-            onChange={(e) => setNovaAtividade({ ...novaAtividade, id: e.target.value })} />
-      </div>
-
-      <div className="form-group col-md-5">
-        <label htmlFor="inputEmail4">Descrição</label>
-        <input
-              id="descricao"
-              type="text"
-              className="form-control" 
-              placeholder="Descrição"
-              value={novaAtividade.descricao}
-              onChange={(e) => 
-              setNovaAtividade({ ...novaAtividade, 
-                descricao: e.target.value })}
-            />
-      </div>
-        <br />
-        <div className='col-12'>
-          <button 
-            className="btn btn-outline-dark"
-            onClick={addAtividade}>
-              + Atividade
-          </button>
-        </div>
-      </form>
+      <Formulario
+        calcularProximoId={calcularProximoId}
+        prioridadeSelecionada={prioridadeSelecionada}
+        setPrioridadeSelecionada={setPrioridadeSelecionada}
+        novaAtividade={novaAtividade}
+        setNovaAtividade={setNovaAtividade}
+        addAtividade={addAtividade}
+        modoEdicao={modoEdicao}
+        salvarEdicao={salvarEdicao}
+        cancelarEdicao={cancelarEdicao}
+      />
       <br />
-      <div className="nt-3">
-        
-          {atividades.map((ativ) => (
-            //style={{width: "18rem"}}
-            <div key={ativ.id} class="card mb-2 shadow-sm" >              
-              <div className="card-body">
-                <div className='d-flex justify-content-between'>
-                  <h5 className='card-title'>
-                  <span  className="badge  badge-dark me-2">
-            
-                      {ativ.id}
-                      </span>
-                      - título
-                  </h5>
-                  <h6>
-                    Prioridade: Normal
-                  </h6>
-                </div>
-                <p className="card-text">{ativ.id} - {ativ.descricao}
-                </p>
-            </div>
-          </div>
-          ))}
-        
-      </div>
+      <ListaAtividades
+        atividades={atividades}
+        modoEdicao={modoEdicao}
+        editarAtividade={editarAtividade}
+        deletarAtividade={deletarAtividade}
+      />
     </div>
   );
 }
