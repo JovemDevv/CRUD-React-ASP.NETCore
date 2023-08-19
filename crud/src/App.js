@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './App.css';
 import Formulario from './components/Formulario';
 import ListaAtividades from './components/ListaAtividades';
@@ -9,6 +10,19 @@ function App() {
   const [prioridadeSelecionada, setPrioridadeSelecionada] = useState('0');
   const [modoEdicao, setModoEdicao] = useState(false);
   const [idEdicao, setIdEdicao] = useState(null);
+
+  useEffect(() => {
+    fetchAtividades(); // Fetch activities when the component mounts
+  }, []);
+
+  async function fetchAtividades() {
+    try {
+      const response = await axios.get('http://localhost:5000/atividades'); // Corrected endpoint
+      setAtividades(response.data);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+    }
+  }
 
   function calcularProximoId() {
     if (atividades.length === 0) {
